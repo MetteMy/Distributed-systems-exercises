@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net"
@@ -27,7 +28,9 @@ func main() {
 
 	//server instance:
 	grpcServer := grpc.NewServer()
-	pb.RegisterChitChatServiceServer(grpcServer, &server{})
+	pb.RegisterChitChatServiceServer(grpcServer, &server{
+		clients: make(map[string]chan *pb.ChatMessage),
+	})
 
 	//listen and serve
 	err = grpcServer.Serve(lis)
@@ -52,9 +55,8 @@ func (s *server) Join(req *pb.JoinRequest, stream pb.ChitChatService_JoinServer)
 
 	for msg := range msgChan {
 		if err := stream.Send(msg); err != nil {
-			delete(s.clients, req.Username)
-			s.Leave()
-			break // client disconnected
+			s.removeClient(req.Username)
+			break
 		}
 	}
 	return nil
@@ -66,15 +68,35 @@ func (s *server) broadcast(msg *pb.ChatMessage) {
 	}
 }
 
-func (s *server) Leave(req *pb.LeaveRequest, stream pb.ChitChatService_LeaveServer) error {
+// method for clean up when a client leaves chit chat:
+func (s *server) removeClient(username string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	// Remove the client from map
+	if _, exists := s.clients[username]; !exists {
+		return
+	}
+	close(s.clients[username])
+	delete(s.clients, username)
+
+	// Broadcast the leave message
 	s.clock++
 	leaveMsg := &pb.ChatMessage{
 		Sender:      "Server",
-		Body:        fmt.Sprintf("Participant %s left Chit Chat at logical time %d", req.Username, s.clock),
+		Body:        fmt.Sprintf("Participant %s left Chit Chat at logical time %d", username, s.clock),
 		LogicalTime: s.clock,
 	}
 	s.broadcast(leaveMsg)
-	return nil
+}
+
+func (s *server) Leave(ctx context.Context, req *pb.LeaveRequest) (*pb.Empty, error) {
+	s.removeClient(req.Username)
+	return &pb.Empty{}, nil
+}
+
+func (s *server) Publish(ctx context.Context, req *pb.PublishRequest) (*pb.Empty, error) {
+
 }
 
 /*func (s *server) SayHello(ctx context.Context, message *pb.Message) (*pb.Message, error) {

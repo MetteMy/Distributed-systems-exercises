@@ -210,6 +210,8 @@ func (x *LeaveRequest) GetUsername() string {
 // message for clients to publish a new chat message
 type PublishRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	Sender        string                 `protobuf:"bytes,1,opt,name=sender,proto3" json:"sender,omitempty"`
+	Body          string                 `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -244,6 +246,20 @@ func (*PublishRequest) Descriptor() ([]byte, []int) {
 	return file_project_root_grpc_proto_proto_rawDescGZIP(), []int{4}
 }
 
+func (x *PublishRequest) GetSender() string {
+	if x != nil {
+		return x.Sender
+	}
+	return ""
+}
+
+func (x *PublishRequest) GetBody() string {
+	if x != nil {
+		return x.Body
+	}
+	return ""
+}
+
 var File_project_root_grpc_proto_proto protoreflect.FileDescriptor
 
 const file_project_root_grpc_proto_proto_rawDesc = "" +
@@ -257,12 +273,14 @@ const file_project_root_grpc_proto_proto_rawDesc = "" +
 	"\vJoinRequest\x12\x1a\n" +
 	"\busername\x18\x01 \x01(\tR\busername\"*\n" +
 	"\fLeaveRequest\x12\x1a\n" +
-	"\busername\x18\x01 \x01(\tR\busername\"\x10\n" +
-	"\x0ePublishRequest2\x89\x01\n" +
+	"\busername\x18\x01 \x01(\tR\busername\"<\n" +
+	"\x0ePublishRequest\x12\x16\n" +
+	"\x06sender\x18\x01 \x01(\tR\x06sender\x12\x12\n" +
+	"\x04body\x18\x02 \x01(\tR\x04body2\x81\x01\n" +
 	"\x0fChitChatService\x12&\n" +
 	"\x04Join\x12\f.JoinRequest\x1a\f.ChatMessage\"\x000\x01\x12$\n" +
-	"\aPublish\x12\x0f.PublishRequest\x1a\x06.Empty\"\x00\x12(\n" +
-	"\x05Leave\x12\r.LeaveRequest\x1a\f.ChatMessage\"\x000\x01B\x19Z\x17project-root/grpc;protob\x06proto3"
+	"\aPublish\x12\x0f.PublishRequest\x1a\x06.Empty\"\x00\x12 \n" +
+	"\x05Leave\x12\r.LeaveRequest\x1a\x06.Empty\"\x00B\x19Z\x17project-root/grpc;protob\x06proto3"
 
 var (
 	file_project_root_grpc_proto_proto_rawDescOnce sync.Once
@@ -290,7 +308,7 @@ var file_project_root_grpc_proto_proto_depIdxs = []int32{
 	3, // 2: ChitChatService.Leave:input_type -> LeaveRequest
 	1, // 3: ChitChatService.Join:output_type -> ChatMessage
 	0, // 4: ChitChatService.Publish:output_type -> Empty
-	1, // 5: ChitChatService.Leave:output_type -> ChatMessage
+	0, // 5: ChitChatService.Leave:output_type -> Empty
 	3, // [3:6] is the sub-list for method output_type
 	0, // [0:3] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name

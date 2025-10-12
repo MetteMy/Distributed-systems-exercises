@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"context"
+	"fmt"
 	"log"
 	"os"
 	pb "project-root/grpc"
@@ -40,6 +42,18 @@ func main() {
 			log.Printf("[%s @ %d]: %s", msg.Sender, msg.LogicalTime, msg.Body)
 		}
 	}()
+
+	for {
+		fmt.Print("> ")
+		text, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+		_, err := c.Publish(context.Background(), &pb.PublishRequest{
+			Sender: os.Args[1],
+			Body:   text,
+		})
+		if err != nil {
+			log.Printf("Error publishing: %v", err)
+		}
+	}
 
 	/*message := pb.Message{
 		Body: "Hello from the client:)",

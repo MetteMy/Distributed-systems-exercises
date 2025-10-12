@@ -29,7 +29,10 @@ message LeaveRequest{
   string username = 1;
 }
 //message for clients to publish a new chat message
-message PublishRequest{}
+message PublishRequest{
+  string sender = 1;
+  string body = 2;
+}
 
 
 //the gRPC service for ChitChat. This is the contract that allows each client to call the methods included in this service:
@@ -37,5 +40,5 @@ service ChitChatService{
   //rpc SayHello (Message) returns (Message) {}
   rpc Join(JoinRequest) returns (stream ChatMessage) {}
   rpc Publish(PublishRequest) returns (Empty) {}
-  rpc Leave(LeaveRequest) returns (stream ChatMessage) {}
+  rpc Leave(LeaveRequest) returns (Empty) {}
 }
