@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
 	pb "project-root/grpc"
+	"syscall"
 
 	"google.golang.org/grpc"
 )
@@ -21,10 +23,26 @@ func main() {
 
 	c := pb.NewChitChatServiceClient(conn)
 
-	/*joining := pb.JoinRequest{
-		Username: os.Args[1],
-	}*/
+	//LEAVING:
+	_, cancel := context.WithCancel(context.Background())
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-sigs
+		fmt.Println("\nLeaving Chit Chat...")
 
+		_, err := c.Leave(context.Background(), &pb.LeaveRequest{
+			Username: os.Args[1],
+		})
+		if err != nil {
+			log.Printf("Error sending leave request: %v", err)
+		}
+		conn.Close()
+		cancel()
+		os.Exit(0)
+	}()
+
+	//JOINING:
 	stream, err := c.Join(context.Background(), &pb.JoinRequest{
 		Username: os.Args[1],
 	})
@@ -55,13 +73,4 @@ func main() {
 		}
 	}
 
-	/*message := pb.Message{
-		Body: "Hello from the client:)",
-	}
-
-	response, err := c.SayHello(context.Background(), &message)
-	if err != nil {
-		log.Fatalf("could not greet: %v", err)
-	}
-	log.Printf("Greeting: %s", response.Body)*/
 }

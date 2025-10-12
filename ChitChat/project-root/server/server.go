@@ -13,7 +13,7 @@ import (
 
 type server struct {
 	pb.UnimplementedChitChatServiceServer
-	clients map[string]chan *pb.ChatMessage //maps key username to a channel
+	clients map[string]chan *pb.ChatMessage //maps key "username" to a channel
 	clock   int64
 	mu      sync.Mutex
 }
@@ -95,9 +95,9 @@ func (s *server) Leave(ctx context.Context, req *pb.LeaveRequest) (*pb.Empty, er
 	return &pb.Empty{}, nil
 }
 
-func (s *server) Publish(ctx context.Context, req *pb.PublishRequest) (*pb.Empty, error) {
+/*func (s *server) Publish(ctx context.Context, req *pb.PublishRequest) (*pb.Empty, error) {
 
-}
+}*/
 
 /*func (s *server) SayHello(ctx context.Context, message *pb.Message) (*pb.Message, error) {
 	log.Printf("Received: %v", message.Body)
