@@ -21,29 +21,26 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// Region content of messages
-// empty message for when no user input is required. Used for join- and leave requests
-type Message struct {
+type Empty struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Body          string                 `protobuf:"bytes,1,opt,name=body,proto3" json:"body,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Message) Reset() {
-	*x = Message{}
+func (x *Empty) Reset() {
+	*x = Empty{}
 	mi := &file_project_root_grpc_proto_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Message) String() string {
+func (x *Empty) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Message) ProtoMessage() {}
+func (*Empty) ProtoMessage() {}
 
-func (x *Message) ProtoReflect() protoreflect.Message {
+func (x *Empty) ProtoReflect() protoreflect.Message {
 	mi := &file_project_root_grpc_proto_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -55,33 +52,82 @@ func (x *Message) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Message.ProtoReflect.Descriptor instead.
-func (*Message) Descriptor() ([]byte, []int) {
+// Deprecated: Use Empty.ProtoReflect.Descriptor instead.
+func (*Empty) Descriptor() ([]byte, []int) {
 	return file_project_root_grpc_proto_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Message) GetBody() string {
+type ChatMessage struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Sender        string                 `protobuf:"bytes,1,opt,name=sender,proto3" json:"sender,omitempty"`
+	Body          string                 `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`
+	LogicalTime   int64                  `protobuf:"varint,3,opt,name=logicalTime,proto3" json:"logicalTime,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ChatMessage) Reset() {
+	*x = ChatMessage{}
+	mi := &file_project_root_grpc_proto_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChatMessage) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChatMessage) ProtoMessage() {}
+
+func (x *ChatMessage) ProtoReflect() protoreflect.Message {
+	mi := &file_project_root_grpc_proto_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChatMessage.ProtoReflect.Descriptor instead.
+func (*ChatMessage) Descriptor() ([]byte, []int) {
+	return file_project_root_grpc_proto_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *ChatMessage) GetSender() string {
+	if x != nil {
+		return x.Sender
+	}
+	return ""
+}
+
+func (x *ChatMessage) GetBody() string {
 	if x != nil {
 		return x.Body
 	}
 	return ""
 }
 
+func (x *ChatMessage) GetLogicalTime() int64 {
+	if x != nil {
+		return x.LogicalTime
+	}
+	return 0
+}
+
 // message for when a new user joins the chat
 type JoinRequest struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// When a new
-	// participant X joins, the service must broadcast a message of the form:
-	// "Participant X joined Chit Chat at logical time L". This message must
-	// be delivered to all participants, including the newly joined one.
-	JoiningUser   string `protobuf:"bytes,1,opt,name=joiningUser,proto3" json:"joiningUser,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Username      string                 `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *JoinRequest) Reset() {
 	*x = JoinRequest{}
-	mi := &file_project_root_grpc_proto_proto_msgTypes[1]
+	mi := &file_project_root_grpc_proto_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -93,7 +139,7 @@ func (x *JoinRequest) String() string {
 func (*JoinRequest) ProtoMessage() {}
 
 func (x *JoinRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_project_root_grpc_proto_proto_msgTypes[1]
+	mi := &file_project_root_grpc_proto_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -106,12 +152,12 @@ func (x *JoinRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use JoinRequest.ProtoReflect.Descriptor instead.
 func (*JoinRequest) Descriptor() ([]byte, []int) {
-	return file_project_root_grpc_proto_proto_rawDescGZIP(), []int{1}
+	return file_project_root_grpc_proto_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *JoinRequest) GetJoiningUser() string {
+func (x *JoinRequest) GetUsername() string {
 	if x != nil {
-		return x.JoiningUser
+		return x.Username
 	}
 	return ""
 }
@@ -119,14 +165,14 @@ func (x *JoinRequest) GetJoiningUser() string {
 // message for when a user leaves the chat
 type LeaveRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	LeavingUser   string                 `protobuf:"bytes,1,opt,name=leavingUser,proto3" json:"leavingUser,omitempty"`
+	Username      string                 `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *LeaveRequest) Reset() {
 	*x = LeaveRequest{}
-	mi := &file_project_root_grpc_proto_proto_msgTypes[2]
+	mi := &file_project_root_grpc_proto_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -138,7 +184,7 @@ func (x *LeaveRequest) String() string {
 func (*LeaveRequest) ProtoMessage() {}
 
 func (x *LeaveRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_project_root_grpc_proto_proto_msgTypes[2]
+	mi := &file_project_root_grpc_proto_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -151,12 +197,12 @@ func (x *LeaveRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LeaveRequest.ProtoReflect.Descriptor instead.
 func (*LeaveRequest) Descriptor() ([]byte, []int) {
-	return file_project_root_grpc_proto_proto_rawDescGZIP(), []int{2}
+	return file_project_root_grpc_proto_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *LeaveRequest) GetLeavingUser() string {
+func (x *LeaveRequest) GetUsername() string {
 	if x != nil {
-		return x.LeavingUser
+		return x.Username
 	}
 	return ""
 }
@@ -170,7 +216,7 @@ type PublishRequest struct {
 
 func (x *PublishRequest) Reset() {
 	*x = PublishRequest{}
-	mi := &file_project_root_grpc_proto_proto_msgTypes[3]
+	mi := &file_project_root_grpc_proto_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -182,7 +228,7 @@ func (x *PublishRequest) String() string {
 func (*PublishRequest) ProtoMessage() {}
 
 func (x *PublishRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_project_root_grpc_proto_proto_msgTypes[3]
+	mi := &file_project_root_grpc_proto_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -195,43 +241,6 @@ func (x *PublishRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PublishRequest.ProtoReflect.Descriptor instead.
 func (*PublishRequest) Descriptor() ([]byte, []int) {
-	return file_project_root_grpc_proto_proto_rawDescGZIP(), []int{3}
-}
-
-// message for displaying a new chat message
-type BroadcastMessage struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *BroadcastMessage) Reset() {
-	*x = BroadcastMessage{}
-	mi := &file_project_root_grpc_proto_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *BroadcastMessage) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*BroadcastMessage) ProtoMessage() {}
-
-func (x *BroadcastMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_project_root_grpc_proto_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use BroadcastMessage.ProtoReflect.Descriptor instead.
-func (*BroadcastMessage) Descriptor() ([]byte, []int) {
 	return file_project_root_grpc_proto_proto_rawDescGZIP(), []int{4}
 }
 
@@ -239,17 +248,21 @@ var File_project_root_grpc_proto_proto protoreflect.FileDescriptor
 
 const file_project_root_grpc_proto_proto_rawDesc = "" +
 	"\n" +
-	"\x1dproject-root/grpc/proto.proto\"\x1d\n" +
-	"\aMessage\x12\x12\n" +
-	"\x04body\x18\x01 \x01(\tR\x04body\"/\n" +
-	"\vJoinRequest\x12 \n" +
-	"\vjoiningUser\x18\x01 \x01(\tR\vjoiningUser\"0\n" +
-	"\fLeaveRequest\x12 \n" +
-	"\vleavingUser\x18\x01 \x01(\tR\vleavingUser\"\x10\n" +
-	"\x0ePublishRequest\"\x12\n" +
-	"\x10BroadcastMessage23\n" +
-	"\x0fChitChatService\x12 \n" +
-	"\bSayHello\x12\b.Message\x1a\b.Message\"\x00B\x19Z\x17project-root/grpc;protob\x06proto3"
+	"\x1dproject-root/grpc/proto.proto\"\a\n" +
+	"\x05Empty\"[\n" +
+	"\vChatMessage\x12\x16\n" +
+	"\x06sender\x18\x01 \x01(\tR\x06sender\x12\x12\n" +
+	"\x04body\x18\x02 \x01(\tR\x04body\x12 \n" +
+	"\vlogicalTime\x18\x03 \x01(\x03R\vlogicalTime\")\n" +
+	"\vJoinRequest\x12\x1a\n" +
+	"\busername\x18\x01 \x01(\tR\busername\"*\n" +
+	"\fLeaveRequest\x12\x1a\n" +
+	"\busername\x18\x01 \x01(\tR\busername\"\x10\n" +
+	"\x0ePublishRequest2\x89\x01\n" +
+	"\x0fChitChatService\x12&\n" +
+	"\x04Join\x12\f.JoinRequest\x1a\f.ChatMessage\"\x000\x01\x12$\n" +
+	"\aPublish\x12\x0f.PublishRequest\x1a\x06.Empty\"\x00\x12(\n" +
+	"\x05Leave\x12\r.LeaveRequest\x1a\f.ChatMessage\"\x000\x01B\x19Z\x17project-root/grpc;protob\x06proto3"
 
 var (
 	file_project_root_grpc_proto_proto_rawDescOnce sync.Once
@@ -265,17 +278,21 @@ func file_project_root_grpc_proto_proto_rawDescGZIP() []byte {
 
 var file_project_root_grpc_proto_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_project_root_grpc_proto_proto_goTypes = []any{
-	(*Message)(nil),          // 0: Message
-	(*JoinRequest)(nil),      // 1: JoinRequest
-	(*LeaveRequest)(nil),     // 2: LeaveRequest
-	(*PublishRequest)(nil),   // 3: PublishRequest
-	(*BroadcastMessage)(nil), // 4: BroadcastMessage
+	(*Empty)(nil),          // 0: Empty
+	(*ChatMessage)(nil),    // 1: ChatMessage
+	(*JoinRequest)(nil),    // 2: JoinRequest
+	(*LeaveRequest)(nil),   // 3: LeaveRequest
+	(*PublishRequest)(nil), // 4: PublishRequest
 }
 var file_project_root_grpc_proto_proto_depIdxs = []int32{
-	0, // 0: ChitChatService.SayHello:input_type -> Message
-	0, // 1: ChitChatService.SayHello:output_type -> Message
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
+	2, // 0: ChitChatService.Join:input_type -> JoinRequest
+	4, // 1: ChitChatService.Publish:input_type -> PublishRequest
+	3, // 2: ChitChatService.Leave:input_type -> LeaveRequest
+	1, // 3: ChitChatService.Join:output_type -> ChatMessage
+	0, // 4: ChitChatService.Publish:output_type -> Empty
+	1, // 5: ChitChatService.Leave:output_type -> ChatMessage
+	3, // [3:6] is the sub-list for method output_type
+	0, // [0:3] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name

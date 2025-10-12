@@ -19,7 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ChitChatService_SayHello_FullMethodName = "/ChitChatService/SayHello"
+	ChitChatService_Join_FullMethodName    = "/ChitChatService/Join"
+	ChitChatService_Publish_FullMethodName = "/ChitChatService/Publish"
+	ChitChatService_Leave_FullMethodName   = "/ChitChatService/Leave"
 )
 
 // ChitChatServiceClient is the client API for ChitChatService service.
@@ -28,7 +30,10 @@ const (
 //
 // the gRPC service for ChitChat. This is the contract that allows each client to call the methods included in this service:
 type ChitChatServiceClient interface {
-	SayHello(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Message, error)
+	// rpc SayHello (Message) returns (Message) {}
+	Join(ctx context.Context, in *JoinRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ChatMessage], error)
+	Publish(ctx context.Context, in *PublishRequest, opts ...grpc.CallOption) (*Empty, error)
+	Leave(ctx context.Context, in *LeaveRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ChatMessage], error)
 }
 
 type chitChatServiceClient struct {
@@ -39,15 +44,53 @@ func NewChitChatServiceClient(cc grpc.ClientConnInterface) ChitChatServiceClient
 	return &chitChatServiceClient{cc}
 }
 
-func (c *chitChatServiceClient) SayHello(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Message, error) {
+func (c *chitChatServiceClient) Join(ctx context.Context, in *JoinRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ChatMessage], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Message)
-	err := c.cc.Invoke(ctx, ChitChatService_SayHello_FullMethodName, in, out, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &ChitChatService_ServiceDesc.Streams[0], ChitChatService_Join_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[JoinRequest, ChatMessage]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type ChitChatService_JoinClient = grpc.ServerStreamingClient[ChatMessage]
+
+func (c *chitChatServiceClient) Publish(ctx context.Context, in *PublishRequest, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, ChitChatService_Publish_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
+
+func (c *chitChatServiceClient) Leave(ctx context.Context, in *LeaveRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ChatMessage], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &ChitChatService_ServiceDesc.Streams[1], ChitChatService_Leave_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[LeaveRequest, ChatMessage]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type ChitChatService_LeaveClient = grpc.ServerStreamingClient[ChatMessage]
 
 // ChitChatServiceServer is the server API for ChitChatService service.
 // All implementations must embed UnimplementedChitChatServiceServer
@@ -55,7 +98,10 @@ func (c *chitChatServiceClient) SayHello(ctx context.Context, in *Message, opts 
 //
 // the gRPC service for ChitChat. This is the contract that allows each client to call the methods included in this service:
 type ChitChatServiceServer interface {
-	SayHello(context.Context, *Message) (*Message, error)
+	// rpc SayHello (Message) returns (Message) {}
+	Join(*JoinRequest, grpc.ServerStreamingServer[ChatMessage]) error
+	Publish(context.Context, *PublishRequest) (*Empty, error)
+	Leave(*LeaveRequest, grpc.ServerStreamingServer[ChatMessage]) error
 	mustEmbedUnimplementedChitChatServiceServer()
 }
 
@@ -66,8 +112,14 @@ type ChitChatServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedChitChatServiceServer struct{}
 
-func (UnimplementedChitChatServiceServer) SayHello(context.Context, *Message) (*Message, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SayHello not implemented")
+func (UnimplementedChitChatServiceServer) Join(*JoinRequest, grpc.ServerStreamingServer[ChatMessage]) error {
+	return status.Errorf(codes.Unimplemented, "method Join not implemented")
+}
+func (UnimplementedChitChatServiceServer) Publish(context.Context, *PublishRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Publish not implemented")
+}
+func (UnimplementedChitChatServiceServer) Leave(*LeaveRequest, grpc.ServerStreamingServer[ChatMessage]) error {
+	return status.Errorf(codes.Unimplemented, "method Leave not implemented")
 }
 func (UnimplementedChitChatServiceServer) mustEmbedUnimplementedChitChatServiceServer() {}
 func (UnimplementedChitChatServiceServer) testEmbeddedByValue()                         {}
@@ -90,23 +142,45 @@ func RegisterChitChatServiceServer(s grpc.ServiceRegistrar, srv ChitChatServiceS
 	s.RegisterService(&ChitChatService_ServiceDesc, srv)
 }
 
-func _ChitChatService_SayHello_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Message)
+func _ChitChatService_Join_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(JoinRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ChitChatServiceServer).Join(m, &grpc.GenericServerStream[JoinRequest, ChatMessage]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type ChitChatService_JoinServer = grpc.ServerStreamingServer[ChatMessage]
+
+func _ChitChatService_Publish_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PublishRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ChitChatServiceServer).SayHello(ctx, in)
+		return srv.(ChitChatServiceServer).Publish(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ChitChatService_SayHello_FullMethodName,
+		FullMethod: ChitChatService_Publish_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChitChatServiceServer).SayHello(ctx, req.(*Message))
+		return srv.(ChitChatServiceServer).Publish(ctx, req.(*PublishRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
+
+func _ChitChatService_Leave_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(LeaveRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ChitChatServiceServer).Leave(m, &grpc.GenericServerStream[LeaveRequest, ChatMessage]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type ChitChatService_LeaveServer = grpc.ServerStreamingServer[ChatMessage]
 
 // ChitChatService_ServiceDesc is the grpc.ServiceDesc for ChitChatService service.
 // It's only intended for direct use with grpc.RegisterService,
@@ -116,10 +190,21 @@ var ChitChatService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ChitChatServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "SayHello",
-			Handler:    _ChitChatService_SayHello_Handler,
+			MethodName: "Publish",
+			Handler:    _ChitChatService_Publish_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "Join",
+			Handler:       _ChitChatService_Join_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "Leave",
+			Handler:       _ChitChatService_Leave_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "project-root/grpc/proto.proto",
 }

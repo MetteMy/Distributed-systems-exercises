@@ -7,34 +7,35 @@ option go_package ="project-root/grpc;proto";
 
 //Region content of messages
 //empty message for when no user input is required. Used for join- and leave requests
-message Message{
+/*message Message{
   string body = 1;
+}*/
+
+message Empty{}
+
+message ChatMessage{
+  string sender = 1;
+  string body = 2;
+  int64 logicalTime = 3;
 }
 
 //message for when a new user joins the chat
 message JoinRequest{
-  /*
-  When a new
-participant X joins, the service must broadcast a message of the form:
-"Participant X joined Chit Chat at logical time L". This message must
-be delivered to all participants, including the newly joined one.*/
-string joiningUser = 1;
+  string username = 1;
 }
 
 //message for when a user leaves the chat
 message LeaveRequest{
-  string leavingUser = 1;
+  string username = 1;
 }
 //message for clients to publish a new chat message
 message PublishRequest{}
 
-//message for displaying a new chat message
-message BroadcastMessage{
-  /*Each broadcast must include the message
-  content and a logical timestamp.*/
-}
 
 //the gRPC service for ChitChat. This is the contract that allows each client to call the methods included in this service:
 service ChitChatService{
-  rpc SayHello (Message) returns (Message) {}
+  //rpc SayHello (Message) returns (Message) {}
+  rpc Join(JoinRequest) returns (stream ChatMessage) {}
+  rpc Publish(PublishRequest) returns (Empty) {}
+  rpc Leave(LeaveRequest) returns (stream ChatMessage) {}
 }
