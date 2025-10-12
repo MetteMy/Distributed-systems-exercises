@@ -94,12 +94,3 @@ func (s *server) Leave(ctx context.Context, req *pb.LeaveRequest) (*pb.Empty, er
 	s.removeClient(req.Username)
 	return &pb.Empty{}, nil
 }
-
-/*func (s *server) Publish(ctx context.Context, req *pb.PublishRequest) (*pb.Empty, error) {
-
-}*/
-
-/*func (s *server) SayHello(ctx context.Context, message *pb.Message) (*pb.Message, error) {
-	log.Printf("Received: %v", message.Body)
-	return &pb.Message{Body: "Hello from the server"}, nil
-}*/
