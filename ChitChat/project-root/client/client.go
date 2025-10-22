@@ -15,7 +15,7 @@ import (
 
 func main() {
 	var conn *grpc.ClientConn
-	conn, err := grpc.Dial("localhost:9000", grpc.WithInsecure())
+	conn, err := grpc.Dial("0.0.0.0:9000", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
