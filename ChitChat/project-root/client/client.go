@@ -60,7 +60,7 @@ func main() {
 			log.Printf("[%s @ %d]: %s", msg.Sender, msg.LogicalTime, msg.Body)
 		}
 	}()
-
+	// Publishing
 	for {
 		fmt.Print("> ")
 		text, _ := bufio.NewReader(os.Stdin).ReadString('\n')

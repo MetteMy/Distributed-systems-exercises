@@ -94,3 +94,16 @@ func (s *server) Leave(ctx context.Context, req *pb.LeaveRequest) (*pb.Empty, er
 	s.removeClient(req.Username)
 	return &pb.Empty{}, nil
 }
+func (s *server) Publish(ctx context.Context, req *pb.PublishRequest) (*pb.Empty, error) {
+	s.mu.Lock()
+	s.clock++
+	msg := &pb.ChatMessage{
+		Sender:      req.Sender,
+		Body:        req.Body,
+		LogicalTime: s.clock,
+	}
+	s.mu.Unlock()
+
+	s.broadcast(msg)
+	return &pb.Empty{}, nil
+}
