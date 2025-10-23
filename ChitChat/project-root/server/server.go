@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 )
 
 type server struct {
@@ -106,4 +107,11 @@ func (s *server) Publish(ctx context.Context, req *pb.PublishRequest) (*pb.Empty
 
 	s.broadcast(msg)
 	return &pb.Empty{}, nil
+}
+
+func (s *server) Compare(ctx context.Context, req *pb.CompareRequest) (*pb.Empty, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	return nil, grpc.Errorf(codes.Unimplemented, "not implemented")
 }

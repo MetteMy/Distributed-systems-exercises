@@ -14,7 +14,11 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func main() {
+type client struct {
+	clock int64
+}
+
+func (client *client) main() {
 	var conn *grpc.ClientConn
 	conn, err := grpc.NewClient("0.0.0.0:9000", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -35,6 +39,8 @@ func main() {
 		_, err := c.Leave(context.Background(), &pb.LeaveRequest{
 			Username: os.Args[1],
 		})
+		client.clock++
+
 		if err != nil {
 			log.Printf("Error sending leave request: %v", err)
 		}
@@ -50,6 +56,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not join: %v", err)
 	}
+	client.clock++
 
 	go func() {
 		for {
@@ -74,4 +81,17 @@ func main() {
 		}
 	}
 
+}
+
+func (client *client) compareClocks(otherClock int64) int64 {
+	if client.clock > otherClock {
+		otherClock = client.clock + 1
+	}
+	if client.clock < otherClock {
+		client.clock = otherClock + 1
+	} else {
+		client.clock++
+		otherClock++
+	}
+	return otherClock
 }

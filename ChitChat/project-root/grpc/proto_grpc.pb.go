@@ -22,6 +22,7 @@ const (
 	ChitChatService_Join_FullMethodName    = "/ChitChatService/Join"
 	ChitChatService_Publish_FullMethodName = "/ChitChatService/Publish"
 	ChitChatService_Leave_FullMethodName   = "/ChitChatService/Leave"
+	ChitChatService_Compare_FullMethodName = "/ChitChatService/Compare"
 )
 
 // ChitChatServiceClient is the client API for ChitChatService service.
@@ -30,10 +31,10 @@ const (
 //
 // the gRPC service for ChitChat. This is the contract that allows each client to call the methods included in this service:
 type ChitChatServiceClient interface {
-	// rpc SayHello (Message) returns (Message) {}
 	Join(ctx context.Context, in *JoinRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ChatMessage], error)
 	Publish(ctx context.Context, in *PublishRequest, opts ...grpc.CallOption) (*Empty, error)
 	Leave(ctx context.Context, in *LeaveRequest, opts ...grpc.CallOption) (*Empty, error)
+	Compare(ctx context.Context, in *CompareRequest, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type chitChatServiceClient struct {
@@ -83,16 +84,26 @@ func (c *chitChatServiceClient) Leave(ctx context.Context, in *LeaveRequest, opt
 	return out, nil
 }
 
+func (c *chitChatServiceClient) Compare(ctx context.Context, in *CompareRequest, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, ChitChatService_Compare_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ChitChatServiceServer is the server API for ChitChatService service.
 // All implementations must embed UnimplementedChitChatServiceServer
 // for forward compatibility.
 //
 // the gRPC service for ChitChat. This is the contract that allows each client to call the methods included in this service:
 type ChitChatServiceServer interface {
-	// rpc SayHello (Message) returns (Message) {}
 	Join(*JoinRequest, grpc.ServerStreamingServer[ChatMessage]) error
 	Publish(context.Context, *PublishRequest) (*Empty, error)
 	Leave(context.Context, *LeaveRequest) (*Empty, error)
+	Compare(context.Context, *CompareRequest) (*Empty, error)
 	mustEmbedUnimplementedChitChatServiceServer()
 }
 
@@ -111,6 +122,9 @@ func (UnimplementedChitChatServiceServer) Publish(context.Context, *PublishReque
 }
 func (UnimplementedChitChatServiceServer) Leave(context.Context, *LeaveRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Leave not implemented")
+}
+func (UnimplementedChitChatServiceServer) Compare(context.Context, *CompareRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Compare not implemented")
 }
 func (UnimplementedChitChatServiceServer) mustEmbedUnimplementedChitChatServiceServer() {}
 func (UnimplementedChitChatServiceServer) testEmbeddedByValue()                         {}
@@ -180,6 +194,24 @@ func _ChitChatService_Leave_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ChitChatService_Compare_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CompareRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChitChatServiceServer).Compare(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ChitChatService_Compare_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChitChatServiceServer).Compare(ctx, req.(*CompareRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ChitChatService_ServiceDesc is the grpc.ServiceDesc for ChitChatService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -194,6 +226,10 @@ var ChitChatService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Leave",
 			Handler:    _ChitChatService_Leave_Handler,
+		},
+		{
+			MethodName: "Compare",
+			Handler:    _ChitChatService_Compare_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
