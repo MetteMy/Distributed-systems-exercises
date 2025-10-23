@@ -29,8 +29,8 @@ message PublishRequest{
 }
 
 message CompareRequest{
-    string thisclock = 1;
-    string otherclock = 2;
+    int64 thisclock = 1;
+    string username = 2;
 }
 
 //the gRPC service for ChitChat. This is the contract that allows each client to call the methods included in this service:

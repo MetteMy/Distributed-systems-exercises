@@ -262,8 +262,8 @@ func (x *PublishRequest) GetBody() string {
 
 type CompareRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Thisclock     string                 `protobuf:"bytes,1,opt,name=thisclock,proto3" json:"thisclock,omitempty"`
-	Otherclock    string                 `protobuf:"bytes,2,opt,name=otherclock,proto3" json:"otherclock,omitempty"`
+	Thisclock     int64                  `protobuf:"varint,1,opt,name=thisclock,proto3" json:"thisclock,omitempty"`
+	Username      string                 `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -298,16 +298,16 @@ func (*CompareRequest) Descriptor() ([]byte, []int) {
 	return file_project_root_grpc_proto_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *CompareRequest) GetThisclock() string {
+func (x *CompareRequest) GetThisclock() int64 {
 	if x != nil {
 		return x.Thisclock
 	}
-	return ""
+	return 0
 }
 
-func (x *CompareRequest) GetOtherclock() string {
+func (x *CompareRequest) GetUsername() string {
 	if x != nil {
-		return x.Otherclock
+		return x.Username
 	}
 	return ""
 }
@@ -328,12 +328,10 @@ const file_project_root_grpc_proto_proto_rawDesc = "" +
 	"\busername\x18\x01 \x01(\tR\busername\"<\n" +
 	"\x0ePublishRequest\x12\x16\n" +
 	"\x06sender\x18\x01 \x01(\tR\x06sender\x12\x12\n" +
-	"\x04body\x18\x02 \x01(\tR\x04body\"N\n" +
+	"\x04body\x18\x02 \x01(\tR\x04body\"J\n" +
 	"\x0eCompareRequest\x12\x1c\n" +
-	"\tthisclock\x18\x01 \x01(\tR\tthisclock\x12\x1e\n" +
-	"\n" +
-	"otherclock\x18\x02 \x01(\tR\n" +
-	"otherclock2\xa7\x01\n" +
+	"\tthisclock\x18\x01 \x01(\x03R\tthisclock\x12\x1a\n" +
+	"\busername\x18\x02 \x01(\tR\busername2\xa7\x01\n" +
 	"\x0fChitChatService\x12&\n" +
 	"\x04Join\x12\f.JoinRequest\x1a\f.ChatMessage\"\x000\x01\x12$\n" +
 	"\aPublish\x12\x0f.PublishRequest\x1a\x06.Empty\"\x00\x12 \n" +

@@ -82,16 +82,3 @@ func (client *client) main() {
 	}
 
 }
-
-func (client *client) compareClocks(otherClock int64) int64 {
-	if client.clock > otherClock {
-		otherClock = client.clock + 1
-	}
-	if client.clock < otherClock {
-		client.clock = otherClock + 1
-	} else {
-		client.clock++
-		otherClock++
-	}
-	return otherClock
-}
