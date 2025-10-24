@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 	pb "project-root/grpc"
 	"sync"
 
@@ -19,6 +20,15 @@ type server struct {
 }
 
 func main() {
+	//setup logFile
+	logFile, err := os.OpenFile("../chitchat.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+	defer logFile.Close()
+	log.SetOutput(logFile)
+	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
+
 	//instantiate listener
 	lis, err := net.Listen("tcp", "0.0.0.0:9000")
 	if err != nil {
