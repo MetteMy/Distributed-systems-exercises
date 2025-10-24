@@ -35,6 +35,7 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	log.Printf("server listening at %v", lis.Addr())
+	fmt.Printf("The server is up and running, listening at %v\n", lis.Addr())
 
 	//server instance:
 	grpcServer := grpc.NewServer()

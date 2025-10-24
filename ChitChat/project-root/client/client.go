@@ -68,6 +68,7 @@ func main() {
 				return
 			}
 			log.Printf("[%s @ %d]: %s", msg.Sender, msg.LogicalTime, msg.Body)
+			fmt.Printf("[%s @ %d]: %s \n", msg.Sender, msg.LogicalTime, msg.Body)
 		}
 	}()
 	// Publishing
