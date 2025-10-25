@@ -74,13 +74,15 @@ func main() {
 	}
 
 	go func() {
+
 		for {
+			client.clock++
 			msg, err := stream.Recv()
 			if err != nil {
 				log.Printf("Stream closed: %v", err)
 				return
 			}
-			client.clock = max(client.clock, msg.LogicalTime) + 1
+			//client.clock = max(client.clock, msg.LogicalTime) + 1
 			log.Printf("[%s @ internal time %d]: %s", msg.Sender, client.clock, msg.Body)
 			//log.Printf("[%s]: %s", msg.Sender, msg.Body)
 		}

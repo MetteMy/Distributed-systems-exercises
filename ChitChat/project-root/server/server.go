@@ -45,12 +45,12 @@ func (s *server) Join(req *pb.JoinRequest, stream pb.ChitChatService_JoinServer)
 	s.clients[req.Username] = msgChan
 	s.mu.Unlock()
 
-	s.clock++
 	joinMsg := &pb.ChatMessage{
 		Sender:      "Server",
 		Body:        fmt.Sprintf("Participant %s joined Chit Chat at logical time %d", req.Username, s.clock),
 		LogicalTime: s.clock,
 	}
+	s.clock++
 	s.broadcast(joinMsg)
 
 	for msg := range msgChan {
@@ -96,16 +96,16 @@ func (s *server) Leave(ctx context.Context, req *pb.LeaveRequest) (*pb.Empty, er
 }
 func (s *server) Publish(ctx context.Context, req *pb.PublishRequest) (*pb.Empty, error) {
 	s.mu.Lock()
-	s.clock = max(s.clock, req.LogicalTime) + 1
-
 	msg := &pb.ChatMessage{
 		Sender:      req.Sender,
 		Body:        req.Body,
 		LogicalTime: s.clock,
 	}
 	s.mu.Unlock()
-
+	
+	s.clock = max(s.clock, req.LogicalTime) + 1
 	s.broadcast(msg)
+	//s.clock++
 	return &pb.Empty{}, nil
 }
 
