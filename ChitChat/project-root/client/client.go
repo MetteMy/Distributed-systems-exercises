@@ -83,21 +83,23 @@ func main() {
 	}()
 
 	// Publishing
-	//client.clock++
+
 	for {
 		fmt.Print("> ")
 		text, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+
 		_, err := c.Publish(context.Background(), &pb.PublishRequest{
 			Sender:      os.Args[1],
 			Body:        text,
 			LogicalTime: client.clock,
 		})
+		//fmt.Println("At client logical time:", client.clock)
 
 		if err != nil {
 			log.Printf("Error publishing: %v", err)
 		}
 	}
-	//client.clock++
+
 }
 
 func max(a, b int64) int64 {
