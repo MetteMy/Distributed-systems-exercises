@@ -212,6 +212,7 @@ type PublishRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Sender        string                 `protobuf:"bytes,1,opt,name=sender,proto3" json:"sender,omitempty"`
 	Body          string                 `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`
+	LogicalTime   int64                  `protobuf:"varint,3,opt,name=logicalTime,proto3" json:"logicalTime,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -260,56 +261,11 @@ func (x *PublishRequest) GetBody() string {
 	return ""
 }
 
-type CompareRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Thisclock     int64                  `protobuf:"varint,1,opt,name=thisclock,proto3" json:"thisclock,omitempty"`
-	Username      string                 `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *CompareRequest) Reset() {
-	*x = CompareRequest{}
-	mi := &file_project_root_grpc_proto_proto_msgTypes[5]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CompareRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CompareRequest) ProtoMessage() {}
-
-func (x *CompareRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_project_root_grpc_proto_proto_msgTypes[5]
+func (x *PublishRequest) GetLogicalTime() int64 {
 	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CompareRequest.ProtoReflect.Descriptor instead.
-func (*CompareRequest) Descriptor() ([]byte, []int) {
-	return file_project_root_grpc_proto_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *CompareRequest) GetThisclock() int64 {
-	if x != nil {
-		return x.Thisclock
+		return x.LogicalTime
 	}
 	return 0
-}
-
-func (x *CompareRequest) GetUsername() string {
-	if x != nil {
-		return x.Username
-	}
-	return ""
 }
 
 var File_project_root_grpc_proto_proto protoreflect.FileDescriptor
@@ -325,18 +281,15 @@ const file_project_root_grpc_proto_proto_rawDesc = "" +
 	"\vJoinRequest\x12\x1a\n" +
 	"\busername\x18\x01 \x01(\tR\busername\"*\n" +
 	"\fLeaveRequest\x12\x1a\n" +
-	"\busername\x18\x01 \x01(\tR\busername\"<\n" +
+	"\busername\x18\x01 \x01(\tR\busername\"^\n" +
 	"\x0ePublishRequest\x12\x16\n" +
 	"\x06sender\x18\x01 \x01(\tR\x06sender\x12\x12\n" +
-	"\x04body\x18\x02 \x01(\tR\x04body\"J\n" +
-	"\x0eCompareRequest\x12\x1c\n" +
-	"\tthisclock\x18\x01 \x01(\x03R\tthisclock\x12\x1a\n" +
-	"\busername\x18\x02 \x01(\tR\busername2\xa7\x01\n" +
+	"\x04body\x18\x02 \x01(\tR\x04body\x12 \n" +
+	"\vlogicalTime\x18\x03 \x01(\x03R\vlogicalTime2\x81\x01\n" +
 	"\x0fChitChatService\x12&\n" +
 	"\x04Join\x12\f.JoinRequest\x1a\f.ChatMessage\"\x000\x01\x12$\n" +
 	"\aPublish\x12\x0f.PublishRequest\x1a\x06.Empty\"\x00\x12 \n" +
-	"\x05Leave\x12\r.LeaveRequest\x1a\x06.Empty\"\x00\x12$\n" +
-	"\aCompare\x12\x0f.CompareRequest\x1a\x06.Empty\"\x00B\x19Z\x17project-root/grpc;protob\x06proto3"
+	"\x05Leave\x12\r.LeaveRequest\x1a\x06.Empty\"\x00B\x19Z\x17project-root/grpc;protob\x06proto3"
 
 var (
 	file_project_root_grpc_proto_proto_rawDescOnce sync.Once
@@ -350,26 +303,23 @@ func file_project_root_grpc_proto_proto_rawDescGZIP() []byte {
 	return file_project_root_grpc_proto_proto_rawDescData
 }
 
-var file_project_root_grpc_proto_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_project_root_grpc_proto_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_project_root_grpc_proto_proto_goTypes = []any{
 	(*Empty)(nil),          // 0: Empty
 	(*ChatMessage)(nil),    // 1: ChatMessage
 	(*JoinRequest)(nil),    // 2: JoinRequest
 	(*LeaveRequest)(nil),   // 3: LeaveRequest
 	(*PublishRequest)(nil), // 4: PublishRequest
-	(*CompareRequest)(nil), // 5: CompareRequest
 }
 var file_project_root_grpc_proto_proto_depIdxs = []int32{
 	2, // 0: ChitChatService.Join:input_type -> JoinRequest
 	4, // 1: ChitChatService.Publish:input_type -> PublishRequest
 	3, // 2: ChitChatService.Leave:input_type -> LeaveRequest
-	5, // 3: ChitChatService.Compare:input_type -> CompareRequest
-	1, // 4: ChitChatService.Join:output_type -> ChatMessage
-	0, // 5: ChitChatService.Publish:output_type -> Empty
-	0, // 6: ChitChatService.Leave:output_type -> Empty
-	0, // 7: ChitChatService.Compare:output_type -> Empty
-	4, // [4:8] is the sub-list for method output_type
-	0, // [0:4] is the sub-list for method input_type
+	1, // 3: ChitChatService.Join:output_type -> ChatMessage
+	0, // 4: ChitChatService.Publish:output_type -> Empty
+	0, // 5: ChitChatService.Leave:output_type -> Empty
+	3, // [3:6] is the sub-list for method output_type
+	0, // [0:3] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -386,7 +336,7 @@ func file_project_root_grpc_proto_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_project_root_grpc_proto_proto_rawDesc), len(file_project_root_grpc_proto_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -26,17 +26,18 @@ message LeaveRequest{
 message PublishRequest{
   string sender = 1;
   string body = 2;
+  int64 logicalTime = 3;
 }
 
-message CompareRequest{
+/*message CompareRequest{
     int64 thisclock = 1;
     string username = 2;
-}
+}*/
 
 //the gRPC service for ChitChat. This is the contract that allows each client to call the methods included in this service:
 service ChitChatService{
   rpc Join(JoinRequest) returns (stream ChatMessage) {} //Server streaming RPC.
   rpc Publish(PublishRequest) returns (Empty) {} //Unary RPC
   rpc Leave(LeaveRequest) returns (Empty) {} //Unary RPC
-  rpc Compare(CompareRequest) returns (Empty) {}
+  //rpc Compare(CompareRequest) returns (Empty) {}
 }

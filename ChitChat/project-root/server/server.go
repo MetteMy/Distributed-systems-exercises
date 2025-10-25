@@ -9,7 +9,6 @@ import (
 	"sync"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
 )
 
 type server struct {
@@ -46,7 +45,7 @@ func (s *server) Join(req *pb.JoinRequest, stream pb.ChitChatService_JoinServer)
 	s.clients[req.Username] = msgChan
 	s.mu.Unlock()
 
-	//s.clock++
+	s.clock++
 	joinMsg := &pb.ChatMessage{
 		Sender:      "Server",
 		Body:        fmt.Sprintf("Participant %s joined Chit Chat at logical time %d", req.Username, s.clock),
@@ -82,7 +81,7 @@ func (s *server) removeClient(username string) {
 	delete(s.clients, username)
 
 	// Broadcast the leave message
-	//s.clock++
+	s.clock++
 	leaveMsg := &pb.ChatMessage{
 		Sender:      "Server",
 		Body:        fmt.Sprintf("Participant %s left Chit Chat at logical time %d", username, s.clock),
@@ -97,7 +96,8 @@ func (s *server) Leave(ctx context.Context, req *pb.LeaveRequest) (*pb.Empty, er
 }
 func (s *server) Publish(ctx context.Context, req *pb.PublishRequest) (*pb.Empty, error) {
 	s.mu.Lock()
-	//s.clock++
+	s.clock = max(s.clock, req.LogicalTime) + 1
+
 	msg := &pb.ChatMessage{
 		Sender:      req.Sender,
 		Body:        req.Body,
@@ -109,28 +109,9 @@ func (s *server) Publish(ctx context.Context, req *pb.PublishRequest) (*pb.Empty
 	return &pb.Empty{}, nil
 }
 
-func (s *server) Compare(ctx context.Context, req *pb.CompareRequest) (*pb.Empty, error) {
-	s.mu.Lock()
-
-	compareMsg := &pb.CompareRequest{
-		Thisclock: s.clock,
-		Username:  req.Username,
+func max(a, b int64) int64 {
+	if a > b {
+		return a
 	}
-	s.mu.Unlock()
-
-	return nil, grpc.Errorf(codes.Unimplemented, "not implemented")
-}
-
-// this probably needs to be moved into client.
-func (s *server) compareClocks(otherClock int64) int64 {
-	if s.clock > otherClock {
-		otherClock = s.clock + 1
-	}
-	if s.clock < otherClock {
-		s.clock = otherClock + 1
-	} else {
-		s.clock++
-		otherClock++
-	}
-	return otherClock
+	return b
 }

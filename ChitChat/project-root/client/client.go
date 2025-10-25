@@ -14,11 +14,17 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-type client struct {
+/*type client struct {
 	clock int64
+}*/
+
+type client struct {
+	username string
+	clock    int64
+	conn     pb.ChitChatServiceClient
 }
 
-func (client *client) main() {
+func main() {
 	var conn *grpc.ClientConn
 	conn, err := grpc.NewClient("0.0.0.0:9000", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -27,6 +33,12 @@ func (client *client) main() {
 	defer conn.Close()
 
 	c := pb.NewChitChatServiceClient(conn)
+
+	client := &client{
+		username: os.Args[1],
+		clock:    0,
+		conn:     c,
+	}
 
 	//LEAVING:
 	_, cancel := context.WithCancel(context.Background())
@@ -39,7 +51,6 @@ func (client *client) main() {
 		_, err := c.Leave(context.Background(), &pb.LeaveRequest{
 			Username: os.Args[1],
 		})
-		client.clock++
 
 		if err != nil {
 			log.Printf("Error sending leave request: %v", err)
@@ -56,7 +67,6 @@ func (client *client) main() {
 	if err != nil {
 		log.Fatalf("could not join: %v", err)
 	}
-	client.clock++
 
 	go func() {
 		for {
@@ -65,20 +75,34 @@ func (client *client) main() {
 				log.Printf("Stream closed: %v", err)
 				return
 			}
-			log.Printf("[%s @ %d]: %s", msg.Sender, msg.LogicalTime, msg.Body)
+			client.clock = max(client.clock, msg.LogicalTime) + 1
+			log.Printf("[%s @ internal time %d]: %s", msg.Sender, client.clock, msg.Body)
+			//log.Printf("[%s]: %s", msg.Sender, msg.Body)
 		}
+
 	}()
+
 	// Publishing
+	//client.clock++
 	for {
 		fmt.Print("> ")
 		text, _ := bufio.NewReader(os.Stdin).ReadString('\n')
 		_, err := c.Publish(context.Background(), &pb.PublishRequest{
-			Sender: os.Args[1],
-			Body:   text,
+			Sender:      os.Args[1],
+			Body:        text,
+			LogicalTime: client.clock,
 		})
+
 		if err != nil {
 			log.Printf("Error publishing: %v", err)
 		}
 	}
+	//client.clock++
+}
 
+func max(a, b int64) int64 {
+	if a > b {
+		return a
+	}
+	return b
 }
