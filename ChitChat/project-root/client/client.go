@@ -76,13 +76,14 @@ func main() {
 	go func() {
 
 		for {
-			client.clock++
+			//client.clock++
 			msg, err := stream.Recv()
+			client.clock = max(client.clock, msg.LogicalTime) + 1 //clients interne ur skal opdateres hver gang den modtager en besked fra serveren (som de andre clients har sendt afsted fx)
 			if err != nil {
 				log.Printf("Stream closed: %v", err)
 				return
 			}
-			//client.clock = max(client.clock, msg.LogicalTime) + 1
+
 			log.Printf("[%s @ internal time %d]: %s", msg.Sender, client.clock, msg.Body)
 			//log.Printf("[%s]: %s", msg.Sender, msg.Body)
 		}
