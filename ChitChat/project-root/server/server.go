@@ -13,26 +13,24 @@ import (
 
 type server struct {
 	pb.UnimplementedChitChatServiceServer
-	clients map[string]chan *pb.ChatMessage //maps key "username" to a channel
+	clients map[string]chan *pb.ChatMessage
 	clock   int64
 	mu      sync.Mutex
 }
 
 func main() {
-	//instantiate listener
+
 	lis, err := net.Listen("tcp", "0.0.0.0:9000")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	log.Printf("server listening at %v", lis.Addr())
 
-	//server instance:
 	grpcServer := grpc.NewServer()
 	pb.RegisterChitChatServiceServer(grpcServer, &server{
 		clients: make(map[string]chan *pb.ChatMessage),
 	})
 
-	//listen and serve
 	err = grpcServer.Serve(lis)
 	if err != nil {
 		log.Fatalf("failed to serve: %v", err)
@@ -45,13 +43,13 @@ func (s *server) Join(req *pb.JoinRequest, stream pb.ChitChatService_JoinServer)
 	s.clients[req.Username] = msgChan
 
 	s.clock = max(s.clock, req.LogicalTime) + 1 //Inkrementér server's clock her, da serveren her modtager besked om at en client vil joine
-	joinEventTime := s.clock
+
 	s.mu.Unlock()
 
-	s.clock++ //inkrementér igen her, da vi sender en besked ud til alle clients
+	//s.clock++ //inkrementér igen her, da vi sender en besked ud til alle clients.
 	joinMsg := &pb.ChatMessage{
 		Sender: "Server",
-		Body:   fmt.Sprintf("Participant %s joined Chit Chat at logical time %d", req.Username, joinEventTime),
+		Body:   fmt.Sprintf("Participant %s joined Chit Chat at logical time %d", req.Username, s.clock),
 		//print det egentlige tidspunkt, hvor client anmoder om at joine. Ikke tidspunktet, serveren sender join-beskeden
 		LogicalTime: s.clock,
 	}
@@ -86,7 +84,7 @@ func (s *server) removeClient(username string) {
 	delete(s.clients, username)
 
 	// Broadcast the leave message
-	s.clock++ //inkrementér da vi sender en besked ud til alle clients
+	//s.clock++ //inkrementér da vi sender en besked ud til alle clients
 	leaveMsg := &pb.ChatMessage{
 		Sender:      "Server",
 		Body:        fmt.Sprintf("Participant %s left Chit Chat at logical time %d", username, s.clock),
@@ -112,7 +110,7 @@ func (s *server) Publish(ctx context.Context, req *pb.PublishRequest) (*pb.Empty
 	}
 	s.mu.Unlock()
 
-	s.clock++
+	//s.clock++
 	s.broadcast(msg)
 
 	return &pb.Empty{}, nil

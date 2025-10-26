@@ -91,7 +91,8 @@ func main() {
 				return
 			}
 
-			log.Printf("[%s @ logical time %d]: %s", msg.Sender, client.clock, msg.Body)
+			log.Printf("[%s @ logical time %d]: %s", msg.Sender, msg.LogicalTime, msg.Body)
+			//log.Printf("[%s @ logical time %d]: %s", msg.Sender, client.clock, msg.Body)
 			//log.Printf("[%s]: %s", msg.Sender, msg.Body)
 		}
 
