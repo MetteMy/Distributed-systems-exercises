@@ -40,19 +40,21 @@ func main() {
 }
 
 func (s *server) Join(req *pb.JoinRequest, stream pb.ChitChatService_JoinServer) error {
-	msgChan := make(chan *pb.ChatMessage, 10)
 	s.mu.Lock()
+	msgChan := make(chan *pb.ChatMessage, 10)
 	s.clients[req.Username] = msgChan
+
+	s.clock = max(s.clock, req.LogicalTime) + 1 //Inkrementér server's clock her, da serveren her modtager besked om at en client vil joine
+	joinEventTime := s.clock
 	s.mu.Unlock()
 
+	s.clock++ //inkrementér igen her, da vi sender en besked ud til alle clients
 	joinMsg := &pb.ChatMessage{
-		Sender:      "Server",
-		Body:        fmt.Sprintf("Participant %s joined Chit Chat at logical time %d", req.Username, s.clock),
+		Sender: "Server",
+		Body:   fmt.Sprintf("Participant %s joined Chit Chat at logical time %d", req.Username, joinEventTime),
+		//print det egentlige tidspunkt, hvor client anmoder om at joine. Ikke tidspunktet, serveren sender join-beskeden
 		LogicalTime: s.clock,
 	}
-	s.clock = max(s.clock, joinMsg.LogicalTime) + 1
-
-	//s.clock++
 
 	s.broadcast(joinMsg)
 
@@ -84,7 +86,7 @@ func (s *server) removeClient(username string) {
 	delete(s.clients, username)
 
 	// Broadcast the leave message
-	s.clock++
+	s.clock++ //inkrementér da vi sender en besked ud til alle clients
 	leaveMsg := &pb.ChatMessage{
 		Sender:      "Server",
 		Body:        fmt.Sprintf("Participant %s left Chit Chat at logical time %d", username, s.clock),
@@ -94,11 +96,15 @@ func (s *server) removeClient(username string) {
 }
 
 func (s *server) Leave(ctx context.Context, req *pb.LeaveRequest) (*pb.Empty, error) {
+	s.clock = max(s.clock, req.LogicalTime) + 1 //Inkrementér server clock da vi modtager besked om, at en client smutter
 	s.removeClient(req.Username)
 	return &pb.Empty{}, nil
 }
+
 func (s *server) Publish(ctx context.Context, req *pb.PublishRequest) (*pb.Empty, error) {
 	s.mu.Lock()
+	s.clock = max(s.clock, req.LogicalTime) + 1
+
 	msg := &pb.ChatMessage{
 		Sender:      req.Sender,
 		Body:        req.Body,
@@ -107,7 +113,6 @@ func (s *server) Publish(ctx context.Context, req *pb.PublishRequest) (*pb.Empty
 	s.mu.Unlock()
 
 	s.clock++
-	//s.clock = max(s.clock, req.LogicalTime) + 1
 	s.broadcast(msg)
 
 	return &pb.Empty{}, nil

@@ -53,8 +53,10 @@ func main() {
 		<-sigs
 		fmt.Println("\nLeaving Chit Chat...")
 
+		client.clock++
 		_, err := c.Leave(context.Background(), &pb.LeaveRequest{
-			Username: os.Args[1],
+			Username:    os.Args[1],
+			LogicalTime: client.clock,
 		})
 
 		if err != nil {
@@ -67,8 +69,10 @@ func main() {
 
 	//JOINING:
 
+	client.clock++
 	stream, err := c.Join(context.Background(), &pb.JoinRequest{
-		Username: os.Args[1],
+		Username:    os.Args[1],
+		LogicalTime: client.clock,
 	})
 	if err != nil {
 		log.Fatalf("could not join: %v", err)
@@ -79,15 +83,15 @@ func main() {
 			//Stream til at modtage beskeder fra andre clients eller server
 			msg, err := stream.Recv()
 			if msg != nil {
-				client.clock = max(client.clock, msg.LogicalTime) + 1 //clients interne ur skal opdateres hver gang den modtager en besked fra serveren (som de andre clients har sendt afsted fx)
+				client.clock = max(msg.LogicalTime, client.clock) + 1
+				//clients interne ur skal opdateres hver gang den modtager en besked fra serveren eller andre clients
 			}
 			if err != nil {
 				log.Printf("Stream closed: %v", err)
 				return
 			}
 
-			//client.clock++
-			log.Printf("[%s @ internal time %d]: %s", msg.Sender, client.clock, msg.Body)
+			log.Printf("[%s @ logical time %d]: %s", msg.Sender, client.clock, msg.Body)
 			//log.Printf("[%s]: %s", msg.Sender, msg.Body)
 		}
 
@@ -99,6 +103,7 @@ func main() {
 		fmt.Print("> ")
 		text, _ := bufio.NewReader(os.Stdin).ReadString('\n')
 
+		client.clock++
 		_, err := c.Publish(context.Background(), &pb.PublishRequest{
 			Sender:      os.Args[1],
 			Body:        text,

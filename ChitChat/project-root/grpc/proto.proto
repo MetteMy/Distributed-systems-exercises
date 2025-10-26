@@ -22,6 +22,7 @@ message JoinRequest{
 //message for when a user leaves the chat
 message LeaveRequest{
   string username = 1;
+  int64 logicalTime = 2;
 }
 //message for clients to publish a new chat message
 message PublishRequest{

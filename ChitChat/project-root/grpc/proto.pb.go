@@ -121,6 +121,7 @@ func (x *ChatMessage) GetLogicalTime() int64 {
 type JoinRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Username      string                 `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
+	LogicalTime   int64                  `protobuf:"varint,2,opt,name=logicalTime,proto3" json:"logicalTime,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -162,10 +163,18 @@ func (x *JoinRequest) GetUsername() string {
 	return ""
 }
 
+func (x *JoinRequest) GetLogicalTime() int64 {
+	if x != nil {
+		return x.LogicalTime
+	}
+	return 0
+}
+
 // message for when a user leaves the chat
 type LeaveRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Username      string                 `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
+	LogicalTime   int64                  `protobuf:"varint,2,opt,name=logicalTime,proto3" json:"logicalTime,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -205,6 +214,13 @@ func (x *LeaveRequest) GetUsername() string {
 		return x.Username
 	}
 	return ""
+}
+
+func (x *LeaveRequest) GetLogicalTime() int64 {
+	if x != nil {
+		return x.LogicalTime
+	}
+	return 0
 }
 
 // message for clients to publish a new chat message
@@ -277,11 +293,13 @@ const file_project_root_grpc_proto_proto_rawDesc = "" +
 	"\vChatMessage\x12\x16\n" +
 	"\x06sender\x18\x01 \x01(\tR\x06sender\x12\x12\n" +
 	"\x04body\x18\x02 \x01(\tR\x04body\x12 \n" +
-	"\vlogicalTime\x18\x03 \x01(\x03R\vlogicalTime\")\n" +
+	"\vlogicalTime\x18\x03 \x01(\x03R\vlogicalTime\"K\n" +
 	"\vJoinRequest\x12\x1a\n" +
-	"\busername\x18\x01 \x01(\tR\busername\"*\n" +
+	"\busername\x18\x01 \x01(\tR\busername\x12 \n" +
+	"\vlogicalTime\x18\x02 \x01(\x03R\vlogicalTime\"L\n" +
 	"\fLeaveRequest\x12\x1a\n" +
-	"\busername\x18\x01 \x01(\tR\busername\"^\n" +
+	"\busername\x18\x01 \x01(\tR\busername\x12 \n" +
+	"\vlogicalTime\x18\x02 \x01(\x03R\vlogicalTime\"^\n" +
 	"\x0ePublishRequest\x12\x16\n" +
 	"\x06sender\x18\x01 \x01(\tR\x06sender\x12\x12\n" +
 	"\x04body\x18\x02 \x01(\tR\x04body\x12 \n" +
