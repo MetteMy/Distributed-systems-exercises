@@ -43,15 +43,14 @@ func (s *server) Join(req *pb.JoinRequest, stream pb.ChitChatService_JoinServer)
 	s.clients[req.Username] = msgChan
 
 	s.clock = max(s.clock, req.LogicalTime) + 1 //Inkrementér server's clock her, da serveren her modtager besked om at en client vil joine
-
+	eventTime := s.clock
 	s.mu.Unlock()
 
 	//s.clock++ //inkrementér igen her, da vi sender en besked ud til alle clients.
 	joinMsg := &pb.ChatMessage{
-		Sender: "Server",
-		Body:   fmt.Sprintf("Participant %s joined Chit Chat at logical time %d", req.Username, s.clock),
-		//print det egentlige tidspunkt, hvor client anmoder om at joine. Ikke tidspunktet, serveren sender join-beskeden
-		LogicalTime: s.clock,
+		Sender:      "Server",
+		Body:        fmt.Sprintf("Participant %s joined Chit Chat", req.Username),
+		LogicalTime: eventTime,
 	}
 
 	s.broadcast(joinMsg)
@@ -71,6 +70,22 @@ func (s *server) broadcast(msg *pb.ChatMessage) {
 	}
 }
 
+func (s *server) Leave(ctx context.Context, req *pb.LeaveRequest) (*pb.Empty, error) {
+	s.clock = max(s.clock, req.LogicalTime) + 1 //Inkrementér server clock da vi modtager besked om, at en client smutter
+	eventTime := s.clock
+
+	s.removeClient(req.Username)
+
+	leaveMsg := &pb.ChatMessage{
+		Sender:      "Server",
+		Body:        fmt.Sprintf("Participant %s left the chat", req.Username),
+		LogicalTime: eventTime,
+	}
+	s.broadcast(leaveMsg)
+
+	return &pb.Empty{}, nil
+}
+
 // method for clean up when a client leaves chit chat:
 func (s *server) removeClient(username string) {
 	s.mu.Lock()
@@ -82,37 +97,21 @@ func (s *server) removeClient(username string) {
 	}
 	close(s.clients[username])
 	delete(s.clients, username)
-
-	// Broadcast the leave message
-	//s.clock++ //inkrementér da vi sender en besked ud til alle clients
-	leaveMsg := &pb.ChatMessage{
-		Sender:      "Server",
-		Body:        fmt.Sprintf("Participant %s left Chit Chat at logical time %d", username, s.clock),
-		LogicalTime: s.clock,
-	}
-	s.broadcast(leaveMsg)
-}
-
-func (s *server) Leave(ctx context.Context, req *pb.LeaveRequest) (*pb.Empty, error) {
-	s.clock = max(s.clock, req.LogicalTime) + 1 //Inkrementér server clock da vi modtager besked om, at en client smutter
-	s.removeClient(req.Username)
-	return &pb.Empty{}, nil
 }
 
 func (s *server) Publish(ctx context.Context, req *pb.PublishRequest) (*pb.Empty, error) {
 	s.mu.Lock()
 	s.clock = max(s.clock, req.LogicalTime) + 1
+	eventTime := s.clock
 
 	msg := &pb.ChatMessage{
 		Sender:      req.Sender,
 		Body:        req.Body,
-		LogicalTime: s.clock,
+		LogicalTime: eventTime,
 	}
 	s.mu.Unlock()
 
-	//s.clock++
 	s.broadcast(msg)
-
 	return &pb.Empty{}, nil
 }
 
