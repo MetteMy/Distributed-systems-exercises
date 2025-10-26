@@ -45,12 +45,14 @@ func (s *server) Join(req *pb.JoinRequest, stream pb.ChitChatService_JoinServer)
 	s.clients[req.Username] = msgChan
 	s.mu.Unlock()
 
-	s.clock++
 	joinMsg := &pb.ChatMessage{
 		Sender:      "Server",
 		Body:        fmt.Sprintf("Participant %s joined Chit Chat at logical time %d", req.Username, s.clock),
 		LogicalTime: s.clock,
 	}
+	s.clock = max(s.clock, joinMsg.LogicalTime) + 1
+
+	//s.clock++
 
 	s.broadcast(joinMsg)
 
@@ -104,9 +106,10 @@ func (s *server) Publish(ctx context.Context, req *pb.PublishRequest) (*pb.Empty
 	}
 	s.mu.Unlock()
 
+	s.clock++
+	//s.clock = max(s.clock, req.LogicalTime) + 1
 	s.broadcast(msg)
-	s.clock = max(s.clock, req.LogicalTime) + 1
-	//s.clock++
+
 	return &pb.Empty{}, nil
 }
 

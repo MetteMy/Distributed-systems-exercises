@@ -66,6 +66,7 @@ func main() {
 	}()
 
 	//JOINING:
+
 	stream, err := c.Join(context.Background(), &pb.JoinRequest{
 		Username: os.Args[1],
 	})
@@ -74,16 +75,18 @@ func main() {
 	}
 
 	go func() {
-
 		for {
-			//client.clock++
+			//Stream til at modtage beskeder fra andre clients eller server
 			msg, err := stream.Recv()
-			client.clock = max(client.clock, msg.LogicalTime) + 1 //clients interne ur skal opdateres hver gang den modtager en besked fra serveren (som de andre clients har sendt afsted fx)
+			if msg != nil {
+				client.clock = max(client.clock, msg.LogicalTime) + 1 //clients interne ur skal opdateres hver gang den modtager en besked fra serveren (som de andre clients har sendt afsted fx)
+			}
 			if err != nil {
 				log.Printf("Stream closed: %v", err)
 				return
 			}
 
+			//client.clock++
 			log.Printf("[%s @ internal time %d]: %s", msg.Sender, client.clock, msg.Body)
 			//log.Printf("[%s]: %s", msg.Sender, msg.Body)
 		}
@@ -101,7 +104,6 @@ func main() {
 			Body:        text,
 			LogicalTime: client.clock,
 		})
-		//fmt.Println("At client logical time:", client.clock)
 
 		if err != nil {
 			log.Printf("Error publishing: %v", err)

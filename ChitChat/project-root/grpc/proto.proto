@@ -16,6 +16,7 @@ message ChatMessage{
 //message for when a new user joins the chat
 message JoinRequest{
   string username = 1;
+  int64 logicalTime = 2;
 }
 
 //message for when a user leaves the chat
