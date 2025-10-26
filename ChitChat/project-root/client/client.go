@@ -14,10 +14,6 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-/*type client struct {
-	clock int64
-}*/
-
 type client struct {
 	username string
 	clock    int64
@@ -68,7 +64,6 @@ func main() {
 	}()
 
 	//JOINING:
-
 	client.clock++
 	stream, err := c.Join(context.Background(), &pb.JoinRequest{
 		Username:    os.Args[1],
@@ -83,8 +78,9 @@ func main() {
 			//Stream til at modtage beskeder fra andre clients eller server
 			msg, err := stream.Recv()
 			if msg != nil {
-				client.clock = max(msg.LogicalTime, client.clock) + 1
 				//clients interne ur skal opdateres hver gang den modtager en besked fra serveren eller andre clients
+				client.clock = max(msg.LogicalTime, client.clock) + 1
+
 			}
 			if err != nil {
 				log.Printf("Stream closed: %v", err)
@@ -92,19 +88,15 @@ func main() {
 			}
 
 			log.Printf("[%s @ logical time %d]: %s", msg.Sender, msg.LogicalTime, msg.Body)
-			//log.Printf("[%s @ logical time %d]: %s", msg.Sender, client.clock, msg.Body)
-			//log.Printf("[%s]: %s", msg.Sender, msg.Body)
 		}
-
 	}()
 
-	// Publishing
-
+	// PUBLISHING:
+	client.clock++
 	for {
 		fmt.Print("> ")
 		text, _ := bufio.NewReader(os.Stdin).ReadString('\n')
 
-		client.clock++
 		_, err := c.Publish(context.Background(), &pb.PublishRequest{
 			Sender:      os.Args[1],
 			Body:        text,

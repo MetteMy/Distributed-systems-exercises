@@ -46,7 +46,6 @@ func (s *server) Join(req *pb.JoinRequest, stream pb.ChitChatService_JoinServer)
 	eventTime := s.clock
 	s.mu.Unlock()
 
-	//s.clock++ //inkrementér igen her, da vi sender en besked ud til alle clients.
 	joinMsg := &pb.ChatMessage{
 		Sender:      "Server",
 		Body:        fmt.Sprintf("Participant %s joined Chit Chat", req.Username),
@@ -91,7 +90,6 @@ func (s *server) removeClient(username string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	// Remove the client from map
 	if _, exists := s.clients[username]; !exists {
 		return
 	}
