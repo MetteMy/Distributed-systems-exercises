@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 	pb "project-root/grpc"
 	"sync"
 
@@ -19,18 +20,30 @@ type server struct {
 }
 
 func main() {
+	//setup logFile
+	logFile, err := os.OpenFile("../chitchat.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+	defer logFile.Close()
+	log.SetOutput(logFile)
+	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 
+	//instantiate listener
 	lis, err := net.Listen("tcp", "0.0.0.0:9000")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	log.Printf("server listening at %v", lis.Addr())
+	fmt.Printf("The server is up and running, listening at %v\n", lis.Addr())
 
+	//server instance:
 	grpcServer := grpc.NewServer()
 	pb.RegisterChitChatServiceServer(grpcServer, &server{
 		clients: make(map[string]chan *pb.ChatMessage),
 	})
 
+	//listen and serve
 	err = grpcServer.Serve(lis)
 	if err != nil {
 		log.Fatalf("failed to serve: %v", err)
