@@ -29,7 +29,6 @@ func main() {
 	log.SetOutput(logFile)
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 
-	//instantiate listener
 	lis, err := net.Listen("tcp", "0.0.0.0:9000")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
@@ -37,13 +36,11 @@ func main() {
 	log.Printf("server listening at %v", lis.Addr())
 	fmt.Printf("The server is up and running, listening at %v\n", lis.Addr())
 
-	//server instance:
 	grpcServer := grpc.NewServer()
 	pb.RegisterChitChatServiceServer(grpcServer, &server{
 		clients: make(map[string]chan *pb.ChatMessage),
 	})
 
-	//listen and serve
 	err = grpcServer.Serve(lis)
 	if err != nil {
 		log.Fatalf("failed to serve: %v", err)
@@ -55,7 +52,7 @@ func (s *server) Join(req *pb.JoinRequest, stream pb.ChitChatService_JoinServer)
 	msgChan := make(chan *pb.ChatMessage, 10)
 	s.clients[req.Username] = msgChan
 
-	s.clock = max(s.clock, req.LogicalTime) + 1 //Inkrementér server's clock her, da serveren her modtager besked om at en client vil joine
+	s.clock = max(s.clock, req.LogicalTime) + 1 //Inkrementér server's clock her, da serveren modtager besked om at en client vil joine
 	eventTime := s.clock
 	s.mu.Unlock()
 
