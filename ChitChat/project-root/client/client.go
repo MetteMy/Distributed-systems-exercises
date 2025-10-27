@@ -22,7 +22,7 @@ type client struct {
 
 func main() {
 	//setup logFile
-	logFile, err := os.OpenFile("../chitchat.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	logFile, err := os.OpenFile("../chitchat.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
 	}
@@ -95,8 +95,8 @@ func main() {
 				log.Printf("Stream closed: %v", err)
 				return
 			}
-
-			log.Printf("[%s @ logical time %d]: %s", msg.Sender, msg.LogicalTime, msg.Body)
+			//if
+			//log.Printf("[%s @ logical time %d]: %s", msg.Sender, msg.LogicalTime, msg.Body)
 			fmt.Printf("[%s @ logical time %d]: %s", msg.Sender, msg.LogicalTime, msg.Body)
 		}
 	}()

@@ -34,7 +34,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	log.Printf("server listening at %v", lis.Addr())
+	log.Printf("Chit Chat is up and running, the server is listening at %v", lis.Addr())
 	fmt.Printf("The server is up and running, listening at %v\n", lis.Addr())
 
 	//server instance:
@@ -62,11 +62,12 @@ func (s *server) Join(req *pb.JoinRequest, stream pb.ChitChatService_JoinServer)
 	s.clock++
 	joinMsg := &pb.ChatMessage{
 		Sender:      "Server",
-		Body:        fmt.Sprintf("Participant %s joined Chit Chat", req.Username),
+		Body:        fmt.Sprintf("Participant %s joined Chit Chat\n", req.Username),
 		LogicalTime: eventTime,
 	}
 
 	s.broadcast(joinMsg)
+	log.Printf("Participant %s joined Chit Chat at logical time: %d", req.Username, joinMsg.LogicalTime)
 
 	for msg := range msgChan {
 		if err := stream.Send(msg); err != nil {
@@ -91,10 +92,11 @@ func (s *server) Leave(ctx context.Context, req *pb.LeaveRequest) (*pb.Empty, er
 
 	leaveMsg := &pb.ChatMessage{
 		Sender:      "Server",
-		Body:        fmt.Sprintf("Participant %s left the chat", req.Username),
+		Body:        fmt.Sprintf("Participant %s left the chat\n", req.Username),
 		LogicalTime: eventTime,
 	}
 	s.broadcast(leaveMsg)
+	log.Printf("User %s has left ChitChat at logical time: %d", req.Username, s.clock)
 
 	return &pb.Empty{}, nil
 }
@@ -125,6 +127,7 @@ func (s *server) Publish(ctx context.Context, req *pb.PublishRequest) (*pb.Empty
 	s.mu.Unlock()
 
 	s.broadcast(msg)
+	log.Printf("[%s @ logical time %d]: %s", msg.Sender, msg.LogicalTime, msg.Body)
 	return &pb.Empty{}, nil
 }
 
