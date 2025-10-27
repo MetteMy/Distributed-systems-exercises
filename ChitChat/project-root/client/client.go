@@ -36,7 +36,7 @@ func main() {
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 
 	var conn *grpc.ClientConn
-	conn, err := grpc.NewClient((serverAddress + ":9000"), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	//conn, err := grpc.NewClient((serverAddress + ":9000"), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	conn, err = grpc.NewClient("0.0.0.0:9000", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
@@ -97,7 +97,7 @@ func main() {
 				return
 			}
 
-			log.Printf("[%s @ logical time %d]: %s", msg.Sender, msg.LogicalTime, msg.Body)
+			//log.Printf("[%s @ logical time %d]: %s", msg.Sender, msg.LogicalTime, msg.Body)
 			log.Printf("[%s @ %d]: %s", msg.Sender, msg.LogicalTime, msg.Body)
 			fmt.Printf("[%s @ %d]: %s \n", msg.Sender, msg.LogicalTime, msg.Body)
 		}
