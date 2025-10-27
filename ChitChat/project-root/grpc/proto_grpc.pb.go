@@ -30,7 +30,6 @@ const (
 //
 // the gRPC service for ChitChat. This is the contract that allows each client to call the methods included in this service:
 type ChitChatServiceClient interface {
-	// rpc SayHello (Message) returns (Message) {}
 	Join(ctx context.Context, in *JoinRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ChatMessage], error)
 	Publish(ctx context.Context, in *PublishRequest, opts ...grpc.CallOption) (*Empty, error)
 	Leave(ctx context.Context, in *LeaveRequest, opts ...grpc.CallOption) (*Empty, error)
@@ -89,7 +88,6 @@ func (c *chitChatServiceClient) Leave(ctx context.Context, in *LeaveRequest, opt
 //
 // the gRPC service for ChitChat. This is the contract that allows each client to call the methods included in this service:
 type ChitChatServiceServer interface {
-	// rpc SayHello (Message) returns (Message) {}
 	Join(*JoinRequest, grpc.ServerStreamingServer[ChatMessage]) error
 	Publish(context.Context, *PublishRequest) (*Empty, error)
 	Leave(context.Context, *LeaveRequest) (*Empty, error)
