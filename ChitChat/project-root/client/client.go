@@ -24,8 +24,13 @@ func main() {
 	log.SetOutput(logFile)
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 
+	serverAddress := "localhost"
+	if len(os.Args) > 2 { // if the client specifies an ip address
+		serverAddress = os.Args[2]
+	}
+
 	var conn *grpc.ClientConn
-	conn, err = grpc.NewClient("0.0.0.0:9000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err = grpc.NewClient((serverAddress + ":9000"), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
