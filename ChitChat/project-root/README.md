@@ -16,7 +16,7 @@
 1. Open a terminal
 2. cd to client
 3. From client directory, run 'go run client.go [name] [ip]'.
-3a. The ip address can be found with the command 'ipconfig' in powershell
+    3a. The ip address can be found with the command 'ipconfig' in powershell
 4. Begin chatting!
 5. When you want to leave, simply press ctrl+c
 
