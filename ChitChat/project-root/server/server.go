@@ -175,12 +175,6 @@ func (s *server) RequestLeave() error {
 		if err != nil {
 			return err
 		}
-		//msg := &pb.ChatMessage{
-		//	Sender:      "Server",
-		//	Body:        fmt.Sprintf("The server is shutting down, and user %s is being requested to leave", username),
-		//	LogicalTime: s.clock,
-		//}
-		//s.clients[username] <- msg
 		log.Printf("the server is shutting down and the user %s was requested to leave", username)
 	}
 	return nil
