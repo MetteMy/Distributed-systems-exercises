@@ -2,12 +2,16 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net"
 	"os"
+	"os/signal"
 	pb "project-root/grpc"
 	"sync"
+	"syscall"
+	"time"
 
 	"google.golang.org/grpc"
 )
@@ -39,15 +43,48 @@ func main() {
 
 	//server instance:
 	grpcServer := grpc.NewServer()
-	pb.RegisterChitChatServiceServer(grpcServer, &server{
+	s := &server{
 		clients: make(map[string]chan *pb.ChatMessage),
-	})
-
-	//listen and serve
-	err = grpcServer.Serve(lis)
-	if err != nil {
-		log.Fatalf("failed to serve: %v", err)
 	}
+	pb.RegisterChitChatServiceServer(grpcServer, s)
+
+	// run grpc server in a separate go routine
+	//listen and serve
+	go func() {
+		err = grpcServer.Serve(lis)
+		if err != nil {
+			log.Fatalf("failed to serve: %v", err)
+		}
+	}()
+
+	//graceful shutdown
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
+
+	// blocks code below, till signal is received
+	<-signalChan
+	log.Println("received termination signal, shutting down gracefully ...")
+	fmt.Println("received termination signal, shutting down gracefully ...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	go func() {
+		err := s.RequestLeave()
+		if err != nil {
+			log.Fatalf("failed to request leave: %v", err)
+		}
+		grpcServer.GracefulStop()
+		cancel()
+	}()
+	<-ctx.Done()
+
+	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+		log.Fatalf("timed out waiting for server to shutdown gracefully, forcing exit")
+		grpcServer.Stop()
+	}
+	log.Println("server shutdown gracefully completed")
+	fmt.Println("server shutdown gracefully completed")
 }
 
 func (s *server) Join(req *pb.JoinRequest, stream pb.ChitChatService_JoinServer) error {
@@ -55,7 +92,7 @@ func (s *server) Join(req *pb.JoinRequest, stream pb.ChitChatService_JoinServer)
 	msgChan := make(chan *pb.ChatMessage, 10)
 	s.clients[req.Username] = msgChan
 
-	s.clock = max(s.clock, req.LogicalTime) + 1 //Inkrementér server's clock her, da serveren her modtager besked om at en client vil joine
+	s.clock = max(s.clock, req.LogicalTime) + 1 //increment the server's clock, when the server receives a join request
 	eventTime := s.clock
 	s.mu.Unlock()
 
@@ -85,7 +122,7 @@ func (s *server) broadcast(msg *pb.ChatMessage) {
 }
 
 func (s *server) Leave(ctx context.Context, req *pb.LeaveRequest) (*pb.Empty, error) {
-	s.clock = max(s.clock, req.LogicalTime) + 1 //Inkrementér server clock da vi modtager besked om, at en client smutter
+	s.clock = max(s.clock, req.LogicalTime) + 1 //increment the server's clock, when receiving a leave request
 	eventTime := s.clock
 
 	s.removeClient(req.Username)
@@ -129,6 +166,24 @@ func (s *server) Publish(ctx context.Context, req *pb.PublishRequest) (*pb.Empty
 	s.broadcast(msg)
 	log.Printf("[%s @ logical time %d]: %s", msg.Sender, msg.LogicalTime, msg.Body)
 	return &pb.Empty{}, nil
+}
+
+func (s *server) RequestLeave() error {
+	for username := range s.clients {
+		s.clock++
+		_, err := s.Leave(context.Background(), &pb.LeaveRequest{Username: username})
+		if err != nil {
+			return err
+		}
+		//msg := &pb.ChatMessage{
+		//	Sender:      "Server",
+		//	Body:        fmt.Sprintf("The server is shutting down, and user %s is being requested to leave", username),
+		//	LogicalTime: s.clock,
+		//}
+		//s.clients[username] <- msg
+		log.Printf("the server is shutting down and the user %s was requested to leave", username)
+	}
+	return nil
 }
 
 func max(a, b int64) int64 {
