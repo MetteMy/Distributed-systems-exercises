@@ -30,11 +30,13 @@ func main() {
 	log.SetOutput(logFile)
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 
+	// handle server address
 	serverAddress := "localhost"
 	if len(os.Args) > 2 { // if the client specifies an ip address
 		serverAddress = os.Args[2]
 	}
 
+	//connect
 	var conn *grpc.ClientConn
 	conn, err = grpc.NewClient((serverAddress + ":9000"), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -67,14 +69,17 @@ func main() {
 		if err != nil {
 			log.Printf("Error sending leave request: %v", err)
 		}
-		conn.Close()
+		err = conn.Close()
+		if err != nil {
+			return
+		}
 		cancel()
 		os.Exit(0)
 	}()
 
 	//JOINING:
 	client.clock++
-	stream, err := c.Join(context.Background(), &pb.JoinRequest{
+	msgStream, err := c.Join(context.Background(), &pb.JoinRequest{
 		Username:    os.Args[1],
 		LogicalTime: client.clock,
 	})
@@ -82,21 +87,22 @@ func main() {
 		log.Fatalf("could not join: %v", err)
 	}
 
+	// Request messages
 	go func() {
 		for {
-			//Stream til at modtage beskeder fra andre clients eller server
-			msg, err := stream.Recv()
+			//stream for receiving messages
+			msg, err := msgStream.Recv()
 			if msg != nil {
-				//clients interne ur skal opdateres hver gang den modtager en besked fra serveren eller andre clients
+				//client's internal clock, is updated everytime it receives a message
 				client.clock = max(msg.LogicalTime, client.clock) + 1
 
 			}
 			if err != nil {
 				log.Printf("Stream closed: %v", err)
+				cancel()
+				os.Exit(0)
 				return
 			}
-			//if
-			//log.Printf("[%s @ logical time %d]: %s", msg.Sender, msg.LogicalTime, msg.Body)
 			fmt.Printf("[%s @ logical time %d]: %s", msg.Sender, msg.LogicalTime, msg.Body)
 		}
 	}()
