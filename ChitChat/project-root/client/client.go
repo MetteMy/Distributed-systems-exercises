@@ -112,15 +112,17 @@ func main() {
 	for {
 		fmt.Print("> ")
 		text, _ := bufio.NewReader(os.Stdin).ReadString('\n')
-
-		_, err := c.Publish(context.Background(), &pb.PublishRequest{
-			Sender:      os.Args[1],
-			Body:        text,
-			LogicalTime: client.clock,
-		})
-
-		if err != nil {
-			log.Printf("Error publishing: %v", err)
+		if len(text) > 128 {
+			fmt.Printf("\nYour message exceeds 128 characters: %s\nPlease write a message of max 128 characters", text)
+		} else {
+			_, err := c.Publish(context.Background(), &pb.PublishRequest{
+				Sender:      os.Args[1],
+				Body:        text,
+				LogicalTime: client.clock,
+			})
+			if err != nil {
+				log.Printf("Error publishing: %v", err)
+			}
 		}
 	}
 
