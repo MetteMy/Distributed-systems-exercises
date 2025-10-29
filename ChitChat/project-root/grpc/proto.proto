@@ -16,16 +16,19 @@ message ChatMessage{
 //message for when a new user joins the chat
 message JoinRequest{
   string username = 1;
+  int64 logicalTime = 2;
 }
 
 //message for when a user leaves the chat
 message LeaveRequest{
   string username = 1;
+  int64 logicalTime = 2;
 }
 //message for clients to publish a new chat message
 message PublishRequest{
   string sender = 1;
   string body = 2;
+  int64 logicalTime = 3;
 }
 
 //the gRPC service for ChitChat. This is the contract that allows each client to call the methods included in this service:
