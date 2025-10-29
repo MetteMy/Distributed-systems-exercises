@@ -22,4 +22,4 @@
 
 
 **Check out the program log**
-1. The chitchat.log-file resides in the server-folder. 
+1. The chitchat.log-file resides in the project-root. 
