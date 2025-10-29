@@ -38,8 +38,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	log.Printf("Chit Chat is up and running, the server is listening at %v", lis.Addr())
-	fmt.Printf("The server is up and running, listening at %v\n", lis.Addr())
+	log.Printf("The server is listening at %v", lis.Addr())
 
 	//server instance:
 	grpcServer := grpc.NewServer()
@@ -47,6 +46,8 @@ func main() {
 		clients: make(map[string]chan *pb.ChatMessage),
 	}
 	pb.RegisterChitChatServiceServer(grpcServer, s)
+	log.Printf("Chit Chat is up and running at logical time: %d", s.clock)
+	fmt.Printf("The server is up and running, listening at %v\n", lis.Addr())
 
 	// run grpc server in a separate go routine
 	//listen and serve
