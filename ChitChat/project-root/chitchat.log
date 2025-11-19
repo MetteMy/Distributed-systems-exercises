@@ -1,22 +1,32 @@
-2025/10/29 10:48:50 server.go:41: The server is listening at [::]:9000
-2025/10/29 10:48:50 server.go:49: Chit Chat is up and running at logical time: 0
-2025/10/29 10:49:35 server.go:108: Participant ALICE joined Chit Chat at logical time: 2
-2025/10/29 10:49:54 server.go:168: [ALICE @ logical time 4]: anyone here?
-2025/10/29 10:50:05 server.go:108: Participant BOB joined Chit Chat at logical time: 5
-2025/10/29 10:50:11 server.go:168: [ALICE @ logical time 7]: welcome!
-2025/10/29 10:50:19 server.go:168: [BOB @ logical time 9]: thanks
-2025/10/29 10:50:30 server.go:108: Participant CHARLIE joined Chit Chat at logical time: 10
-2025/10/29 10:50:36 server.go:168: [CHARLIE @ logical time 12]: hello
-2025/10/29 10:50:44 server.go:168: [BOB @ logical time 14]: hi
-2025/10/29 10:50:48 server.go:168: [ALICE @ logical time 16]: bye
-2025/10/29 10:50:52 server.go:168: [BOB @ logical time 18]: bye
-2025/10/29 10:50:57 server.go:137: User ALICE has left ChitChat at logical time: 21
-2025/10/29 10:51:08 server.go:168: [CHARLIE @ logical time 23]: bye
-2025/10/29 10:51:14 server.go:67: received termination signal, shutting down gracefully ...
-2025/10/29 10:51:14 server.go:137: User BOB has left ChitChat at logical time: 25
-2025/10/29 10:51:14 server.go:179: the server is shutting down and the user BOB was requested to leave
-2025/10/29 10:51:14 server.go:137: User CHARLIE has left ChitChat at logical time: 27
-2025/10/29 10:51:14 server.go:179: the server is shutting down and the user CHARLIE was requested to leave
-2025/10/29 10:51:14 client.go:101: Stream closed: EOF
-2025/10/29 10:51:14 client.go:101: Stream closed: EOF
-2025/10/29 10:51:14 server.go:87: server shutdown gracefully completed
+2025/11/19 10:41:08 server.go:41: The server is listening at [::]:9000
+2025/11/19 10:41:08 server.go:49: Chit Chat is up and running at logical time: 0
+2025/11/19 10:41:09 server.go:105: Participant ALICE joined Chit Chat at server logical time: 2
+2025/11/19 10:41:09 server.go:120: Broadcasting join to user ALICE at server logical time: 3
+2025/11/19 10:41:11 server.go:105: Participant BOB joined Chit Chat at server logical time: 4
+2025/11/19 10:41:11 server.go:120: Broadcasting join to user ALICE at server logical time: 5
+2025/11/19 10:41:11 server.go:120: Broadcasting join to user BOB at server logical time: 5
+2025/11/19 10:41:12 server.go:105: Participant CHARLIE joined Chit Chat at server logical time: 6
+2025/11/19 10:41:12 server.go:120: Broadcasting join to user CHARLIE at server logical time: 7
+2025/11/19 10:41:12 server.go:120: Broadcasting join to user ALICE at server logical time: 7
+2025/11/19 10:41:12 server.go:120: Broadcasting join to user BOB at server logical time: 7
+2025/11/19 10:41:15 server.go:165: [ALICE @ server logical time 8]: hi
+2025/11/19 10:41:15 server.go:120: Broadcasting chat-message to user CHARLIE at server logical time: 9
+2025/11/19 10:41:15 server.go:120: Broadcasting chat-message to user ALICE at server logical time: 9
+2025/11/19 10:41:15 server.go:120: Broadcasting chat-message to user BOB at server logical time: 9
+2025/11/19 10:41:17 server.go:165: [BOB @ server logical time 10]: bye
+2025/11/19 10:41:17 server.go:120: Broadcasting chat-message to user CHARLIE at server logical time: 11
+2025/11/19 10:41:17 server.go:120: Broadcasting chat-message to user ALICE at server logical time: 11
+2025/11/19 10:41:17 server.go:120: Broadcasting chat-message to user BOB at server logical time: 11
+2025/11/19 10:41:19 server.go:135: User BOB has left ChitChat at logical time: 13
+2025/11/19 10:41:19 server.go:120: Broadcasting leave to user ALICE at server logical time: 14
+2025/11/19 10:41:19 server.go:120: Broadcasting leave to user CHARLIE at server logical time: 14
+2025/11/19 10:41:19 client.go:101: Stream closed: EOF
+2025/11/19 10:41:22 server.go:68: received termination signal at logical time: 15, shutting down gracefully ...
+2025/11/19 10:41:22 server.go:135: User ALICE has left ChitChat at logical time: 17
+2025/11/19 10:41:22 server.go:120: Broadcasting leave to user CHARLIE at server logical time: 18
+2025/11/19 10:41:22 server.go:177: the server is shutting down and the user ALICE was requested to leave
+2025/11/19 10:41:22 server.go:135: User CHARLIE has left ChitChat at logical time: 20
+2025/11/19 10:41:22 server.go:177: the server is shutting down and the user CHARLIE was requested to leave
+2025/11/19 10:41:22 client.go:101: Stream closed: EOF
+2025/11/19 10:41:22 client.go:101: Stream closed: EOF
+2025/11/19 10:41:22 server.go:88: server shutdown gracefully completed
