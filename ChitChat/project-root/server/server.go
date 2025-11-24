@@ -64,7 +64,8 @@ func main() {
 
 	// blocks code below, till signal is received
 	<-signalChan
-	log.Println("received termination signal, shutting down gracefully ...")
+	s.clock++
+	log.Printf("received termination signal at logical time: %d, shutting down gracefully ...", s.clock)
 	fmt.Println("received termination signal, shutting down gracefully ...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -94,19 +95,15 @@ func (s *server) Join(req *pb.JoinRequest, stream pb.ChitChatService_JoinServer)
 	s.clients[req.Username] = msgChan
 
 	s.clock = max(s.clock, req.LogicalTime) + 1 //increment the server's clock, when the server receives a join request
-	eventTime := s.clock
 	s.mu.Unlock()
 
-	s.clock++
 	joinMsg := &pb.ChatMessage{
 		Sender:      "Server",
 		Body:        fmt.Sprintf("Participant %s joined Chit Chat\n", req.Username),
-		LogicalTime: eventTime,
+		LogicalTime: s.clock,
 	}
-
-	s.broadcast(joinMsg)
-	log.Printf("Participant %s joined Chit Chat at logical time: %d", req.Username, joinMsg.LogicalTime)
-
+	log.Printf("Participant %s joined Chit Chat at server logical time: %d", req.Username, joinMsg.LogicalTime)
+	s.broadcast(joinMsg, "join")
 	for msg := range msgChan {
 		if err := stream.Send(msg); err != nil {
 			s.removeClient(req.Username)
@@ -116,9 +113,11 @@ func (s *server) Join(req *pb.JoinRequest, stream pb.ChitChatService_JoinServer)
 	return nil
 }
 
-func (s *server) broadcast(msg *pb.ChatMessage) {
+func (s *server) broadcast(msg *pb.ChatMessage, msgType string) {
+	s.clock++
 	for username := range s.clients {
 		s.clients[username] <- msg
+		log.Printf("Broadcasting %s to user %s at server logical time: %d", msgType, username, s.clock)
 	}
 }
 
@@ -133,8 +132,8 @@ func (s *server) Leave(ctx context.Context, req *pb.LeaveRequest) (*pb.Empty, er
 		Body:        fmt.Sprintf("Participant %s left the chat\n", req.Username),
 		LogicalTime: eventTime,
 	}
-	s.broadcast(leaveMsg)
 	log.Printf("User %s has left ChitChat at logical time: %d", req.Username, s.clock)
+	s.broadcast(leaveMsg, "leave")
 
 	return &pb.Empty{}, nil
 }
@@ -163,9 +162,8 @@ func (s *server) Publish(ctx context.Context, req *pb.PublishRequest) (*pb.Empty
 		LogicalTime: eventTime,
 	}
 	s.mu.Unlock()
-
-	s.broadcast(msg)
-	log.Printf("[%s @ logical time %d]: %s", msg.Sender, msg.LogicalTime, msg.Body)
+	log.Printf("[%s @ server logical time %d]: %s", msg.Sender, s.clock, msg.Body)
+	s.broadcast(msg, "chat-message")
 	return &pb.Empty{}, nil
 }
 
